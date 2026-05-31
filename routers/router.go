@@ -16,4 +16,11 @@ func init() {
 	// Auth endpoints
 	beego.Router("/api/v1/auth/register", &controllers.AuthController{}, "post:Register")
 	beego.Router("/api/v1/auth/login", &controllers.AuthController{}, "post:Login")
+
+	// Expense endpoints
+	beego.Router("/api/v1/expenses", &controllers.ExpenseController{}, "post:Create")
+	beego.Router("/api/v1/expenses", &controllers.ExpenseController{}, "get:List")
+	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "get:GetOne")
+	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "put:Update")
+	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "delete:Delete")
 }
