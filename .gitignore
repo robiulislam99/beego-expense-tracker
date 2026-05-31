@@ -1,0 +1,20 @@
+# Ignore real config (contains secrets)
+conf/app.conf
+
+# Ignore compiled binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+expense-tracker-api
+
+# Ignore test cache
+*.test
+*.out
+
+# Ignore Go build cache
+/vendor/
+
+# Ignore data files
+data/*.csv
