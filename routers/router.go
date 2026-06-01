@@ -20,6 +20,10 @@ func init() {
 	// Expense endpoints
 	beego.Router("/api/v1/expenses", &controllers.ExpenseController{}, "post:Create")
 	beego.Router("/api/v1/expenses", &controllers.ExpenseController{}, "get:List")
+
+	// Summary must be registered BEFORE /:id to avoid conflict
+	beego.Router("/api/v1/expenses/summary", &controllers.ExpenseController{}, "get:Summary")
+
 	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "get:GetOne")
 	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "put:Update")
 	beego.Router("/api/v1/expenses/:id", &controllers.ExpenseController{}, "delete:Delete")

@@ -130,7 +130,7 @@ func (c *ExpenseController) Create() {
 }
 
 // List handles GET /api/v1/expenses
-// Returns all expenses for the authenticated user with optional pagination.
+// Returns expenses for the authenticated user with optional filtering, sorting, and pagination.
 func (c *ExpenseController) List() {
 	logs.Info("List expenses endpoint called")
 
@@ -146,8 +146,78 @@ func (c *ExpenseController) List() {
 		return
 	}
 
-	// Apply pagination via ?limit query parameter
-	limitStr := c.GetString("limit")
+	// --- Step 1: Filter by category ---
+	category := strings.TrimSpace(c.GetString("category"))
+	if category != "" {
+		if !models.IsValidCategory(category) {
+			c.SendError(400, "Invalid category")
+			return
+		}
+		var filtered []models.Expense
+		for _, e := range expenses {
+			if e.Category == category {
+				filtered = append(filtered, e)
+			}
+		}
+		expenses = filtered
+	}
+
+	// --- Step 2: Filter by date range ---
+	dateFrom := strings.TrimSpace(c.GetString("date_from"))
+	dateTo := strings.TrimSpace(c.GetString("date_to"))
+
+	if dateFrom != "" {
+		if !isValidDate(dateFrom) {
+			c.SendError(400, "Invalid date_from format, use YYYY-MM-DD")
+			return
+		}
+		var filtered []models.Expense
+		for _, e := range expenses {
+			if e.ExpenseDate >= dateFrom {
+				filtered = append(filtered, e)
+			}
+		}
+		expenses = filtered
+	}
+
+	if dateTo != "" {
+		if !isValidDate(dateTo) {
+			c.SendError(400, "Invalid date_to format, use YYYY-MM-DD")
+			return
+		}
+		var filtered []models.Expense
+		for _, e := range expenses {
+			if e.ExpenseDate <= dateTo {
+				filtered = append(filtered, e)
+			}
+		}
+		expenses = filtered
+	}
+
+	// --- Step 3: Sort ---
+	sortBy := strings.TrimSpace(c.GetString("sort_by"))
+	sortOrder := strings.TrimSpace(c.GetString("sort_order"))
+
+	// Default sort order is descending
+	if sortOrder == "" {
+		sortOrder = "desc"
+	}
+
+	if sortBy != "" && sortBy != "amount" && sortBy != "expense_date" {
+		c.SendError(400, "Invalid sort_by, use amount or expense_date")
+		return
+	}
+	if sortOrder != "asc" && sortOrder != "desc" {
+		c.SendError(400, "Invalid sort_order, use asc or desc")
+		return
+	}
+
+	if sortBy != "" {
+		models.SortExpenses(expenses, sortBy, sortOrder)
+	}
+
+	// --- Step 4: Pagination via ?limit ---
+	limitStr := strings.TrimSpace(c.GetString("limit"))
 	if limitStr != "" {
 		limit, err := strconv.Atoi(limitStr)
 		if err != nil || limit <= 0 {
@@ -317,4 +387,96 @@ func (c *ExpenseController) Delete() {
 func isValidDate(date string) bool {
 	_, err := time.Parse("2006-01-02", date)
 	return err == nil
+}
+
+// Summary handles GET /api/v1/expenses/summary
+// Returns total spending grouped by category for a given date range.
+func (c *ExpenseController) Summary() {
+	logs.Info("Summary endpoint called")
+
+	userID, ok := c.getCurrentUserID()
+	if !ok {
+		return
+	}
+
+	// Both date_from and date_to are required
+	dateFrom := strings.TrimSpace(c.GetString("date_from"))
+	dateTo := strings.TrimSpace(c.GetString("date_to"))
+
+	if dateFrom == "" {
+		c.SendError(400, "date_from is required")
+		return
+	}
+	if dateTo == "" {
+		c.SendError(400, "date_to is required")
+		return
+	}
+	if !isValidDate(dateFrom) {
+		c.SendError(400, "Invalid date_from format, use YYYY-MM-DD")
+		return
+	}
+	if !isValidDate(dateTo) {
+		c.SendError(400, "Invalid date_to format, use YYYY-MM-DD")
+		return
+	}
+	if dateTo < dateFrom {
+		c.SendError(400, "date_to must be after date_from")
+		return
+	}
+
+	expenses, err := models.GetExpensesByUserID(userID)
+	if err != nil {
+		logs.Error("Summary: failed to read CSV:", err)
+		c.SendError(500, "Failed to retrieve expenses")
+		return
+	}
+
+	// Filter by date range
+	var filtered []models.Expense
+	for _, e := range expenses {
+		if e.ExpenseDate >= dateFrom && e.ExpenseDate <= dateTo {
+			filtered = append(filtered, e)
+		}
+	}
+
+	// Group totals and counts by category using a map
+	categoryTotals := make(map[string]float64)
+	categoryCounts := make(map[string]int)
+	totalAmount := 0.0
+
+	for _, e := range filtered {
+		categoryTotals[e.Category] += e.Amount
+		categoryCounts[e.Category]++
+		totalAmount += e.Amount
+	}
+
+	// Build the by_category slice
+	type categoryEntry struct {
+		Category string  `json:"category"`
+		Total    float64 `json:"total"`
+		Count    int     `json:"count"`
+	}
+
+	var byCategory []categoryEntry
+	for _, cat := range models.AllowedCategories {
+		if total, exists := categoryTotals[cat]; exists {
+			byCategory = append(byCategory, categoryEntry{
+				Category: cat,
+				Total:    total,
+				Count:    categoryCounts[cat],
+			})
+		}
+	}
+
+	// Build summary response
+	summary := map[string]interface{}{
+		"date_from":    dateFrom,
+		"date_to":      dateTo,
+		"total_amount": totalAmount,
+		"total_count":  len(filtered),
+		"by_category":  byCategory,
+	}
+
+	logs.Info("Summary generated for user ID:", userID)
+	c.SendSuccess("Summary generated", summary)
 }

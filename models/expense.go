@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -335,4 +336,24 @@ func writeAllExpenses(expenses []Expense) error {
 	}
 
 	return nil
+}
+
+// SortExpenses sorts a slice of expenses by the given field and order.
+// Supported fields: amount, expense_date. Orders: asc, desc.
+func SortExpenses(expenses []Expense, sortBy string, sortOrder string) {
+	sort.Slice(expenses, func(i, j int) bool {
+		switch sortBy {
+		case "amount":
+			if sortOrder == "asc" {
+				return expenses[i].Amount < expenses[j].Amount
+			}
+			return expenses[i].Amount > expenses[j].Amount
+		case "expense_date":
+			if sortOrder == "asc" {
+				return expenses[i].ExpenseDate < expenses[j].ExpenseDate
+			}
+			return expenses[i].ExpenseDate > expenses[j].ExpenseDate
+		}
+		return false
+	})
 }
