@@ -175,6 +175,12 @@ func GetNextExpenseID() int {
 func CreateExpense(expense *Expense) error {
 	filePath := getExpensesCSVPath()
 
+	// Ensure the data directory exists before writing
+	if err := os.MkdirAll("data", 0755); err != nil {
+		logs.Error("Failed to create data directory:", err)
+		return err
+	}
+
 	// Check if file already exists to avoid writing header twice
 	fileExists := true
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {

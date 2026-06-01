@@ -139,6 +139,12 @@ func GetNextUserID() int {
 // Creates the file with a header row if it does not exist yet.
 func CreateUser(user *User) error {
 	filePath := getUsersCSVPath()
+	
+	// Ensure the data directory exists before writing
+	if err := os.MkdirAll("data", 0755); err != nil {
+		logs.Error("Failed to create data directory:", err)
+		return err
+	}
 
 	// Check if file already exists to avoid writing header twice
 	fileExists := true
