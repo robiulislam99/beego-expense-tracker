@@ -44,10 +44,10 @@ func IsValidCategory(category string) bool {
 }
 
 // getExpensesCSVPath reads the CSV file path from app.conf.
-// Falls back to a default path if config is not set.
+// Falls back to a default path if config is not loaded (e.g. during tests).
 func getExpensesCSVPath() string {
-	path, _ := beego.AppConfig.String("expenses_csv_path")
-	if path == "" {
+	path, err := beego.AppConfig.String("expenses_csv_path")
+	if err != nil || path == "" {
 		return "data/expenses.csv"
 	}
 	return path

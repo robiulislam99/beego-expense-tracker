@@ -24,10 +24,10 @@ type User struct {
 }
 
 // getUsersCSVPath reads the CSV file path from app.conf.
-// Falls back to a default path if config is not set.
+// Falls back to a default path if config is not loaded (e.g. during tests).
 func getUsersCSVPath() string {
-	path, _ := beego.AppConfig.String("users_csv_path")
-	if path == "" {
+	path, err := beego.AppConfig.String("users_csv_path")
+	if err != nil || path == "" {
 		return "data/users.csv"
 	}
 	return path

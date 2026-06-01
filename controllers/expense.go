@@ -159,7 +159,7 @@ func (c *ExpenseController) List() {
 				filtered = append(filtered, e)
 			}
 		}
-		expenses = filtered
+		expenses = filteredgo test -v -coverpkg=./... ./tests/...
 	}
 
 	// --- Step 2: Filter by date range ---
