@@ -1,0 +1,339 @@
+basePath: /
+definitions:
+  controllers.ResponseData:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  controllers.expenseInput:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      expense_date:
+        type: string
+      note:
+        type: string
+      title:
+        type: string
+    type: object
+  controllers.loginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  controllers.registerInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@expense-tracker.com
+  description: Personal Expense Tracker REST API built with Go and Beego v2
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Expense Tracker API
+  version: 1.0.0
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.loginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Login with email and password
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.registerInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Register a new user account
+      tags:
+      - Auth
+  /api/v1/expenses:
+    get:
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter from date YYYY-MM-DD
+        in: query
+        name: date_from
+        type: string
+      - description: Filter to date YYYY-MM-DD
+        in: query
+        name: date_to
+        type: string
+      - description: Sort by amount or expense_date
+        in: query
+        name: sort_by
+        type: string
+      - description: asc or desc
+        in: query
+        name: sort_order
+        type: string
+      - description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: List all expenses with optional filters and sorting
+      tags:
+      - Expenses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.expenseInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Create a new expense
+      tags:
+      - Expenses
+  /api/v1/expenses/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Delete an expense by ID
+      tags:
+      - Expenses
+    get:
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Get a single expense by ID
+      tags:
+      - Expenses
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated expense details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.expenseInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Update an existing expense
+      tags:
+      - Expenses
+  /api/v1/expenses/summary:
+    get:
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: integer
+      - description: Start date YYYY-MM-DD
+        in: query
+        name: date_from
+        required: true
+        type: string
+      - description: End date YYYY-MM-DD
+        in: query
+        name: date_to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Get spending summary grouped by category
+      tags:
+      - Expenses
+  /api/v1/health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ResponseData'
+      summary: Check if the server is running
+      tags:
+      - Health
+swagger: "2.0"

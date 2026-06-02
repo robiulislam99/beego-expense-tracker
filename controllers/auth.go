@@ -39,14 +39,26 @@ type loginResponse struct {
 }
 
 // HealthCheck handles GET /api/v1/health
-// Returns a simple message confirming the server is running.
+// @Summary Check if the server is running
+// @Tags Health
+// @Produce json
+// @Success 200 {object} ResponseData
+// @Router /api/v1/health [get]
 func (c *AuthController) HealthCheck() {
 	logs.Info("Health check endpoint called")
 	c.SendSuccess("Server is running", nil)
 }
 
 // Register handles POST /api/v1/auth/register
-// Validates input and creates a new user in the CSV file.
+// @Summary Register a new user account
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body registerInput true "User registration details"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Failure 409 {object} ResponseData
+// @Router /api/v1/auth/register [post]
 func (c *AuthController) Register() {
 	logs.Info("Register endpoint called")
 
@@ -117,7 +129,15 @@ func (c *AuthController) Register() {
 }
 
 // Login handles POST /api/v1/auth/login
-// Checks email and password against the CSV file and returns user info.
+// @Summary Login with email and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body loginInput true "Login credentials"
+// @Success 200 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Router /api/v1/auth/login [post]
 func (c *AuthController) Login() {
 	logs.Info("Login endpoint called")
 

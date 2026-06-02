@@ -55,7 +55,16 @@ func (c *ExpenseController) getCurrentUserID() (int, bool) {
 }
 
 // Create handles POST /api/v1/expenses
-// Creates a new expense for the authenticated user.
+// @Summary Create a new expense
+// @Tags Expenses
+// @Accept json
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param body body expenseInput true "Expense details"
+// @Success 201 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Router /api/v1/expenses [post]
 func (c *ExpenseController) Create() {
 	logs.Info("Create expense endpoint called")
 
@@ -71,7 +80,7 @@ func (c *ExpenseController) Create() {
 		return
 	}
 
-	// Trim whitespace
+	// Trim whitespace from all string fields
 	input.Title = strings.TrimSpace(input.Title)
 	input.Category = strings.TrimSpace(input.Category)
 	input.Note = strings.TrimSpace(input.Note)
@@ -130,7 +139,19 @@ func (c *ExpenseController) Create() {
 }
 
 // List handles GET /api/v1/expenses
-// Returns expenses for the authenticated user with optional filtering, sorting, and pagination.
+// @Summary List all expenses with optional filters and sorting
+// @Tags Expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param category query string false "Filter by category"
+// @Param date_from query string false "Filter from date YYYY-MM-DD"
+// @Param date_to query string false "Filter to date YYYY-MM-DD"
+// @Param sort_by query string false "Sort by amount or expense_date"
+// @Param sort_order query string false "asc or desc"
+// @Param limit query int false "Limit number of results"
+// @Success 200 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Router /api/v1/expenses [get]
 func (c *ExpenseController) List() {
 	logs.Info("List expenses endpoint called")
 
@@ -159,7 +180,7 @@ func (c *ExpenseController) List() {
 				filtered = append(filtered, e)
 			}
 		}
-		expenses = filteredgo test -v -coverpkg=./... ./tests/...
+		expenses = filtered
 	}
 
 	// --- Step 2: Filter by date range ---
@@ -238,7 +259,15 @@ func (c *ExpenseController) List() {
 }
 
 // GetOne handles GET /api/v1/expenses/:id
-// Returns a single expense by ID for the authenticated user.
+// @Summary Get a single expense by ID
+// @Tags Expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param id path int true "Expense ID"
+// @Success 200 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Failure 404 {object} ResponseData
+// @Router /api/v1/expenses/{id} [get]
 func (c *ExpenseController) GetOne() {
 	logs.Info("Get one expense endpoint called")
 
@@ -266,7 +295,18 @@ func (c *ExpenseController) GetOne() {
 }
 
 // Update handles PUT /api/v1/expenses/:id
-// Updates an existing expense for the authenticated user.
+// @Summary Update an existing expense
+// @Tags Expenses
+// @Accept json
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param id path int true "Expense ID"
+// @Param body body expenseInput true "Updated expense details"
+// @Success 200 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Failure 404 {object} ResponseData
+// @Router /api/v1/expenses/{id} [put]
 func (c *ExpenseController) Update() {
 	logs.Info("Update expense endpoint called")
 
@@ -304,7 +344,7 @@ func (c *ExpenseController) Update() {
 	input.Note = strings.TrimSpace(input.Note)
 	input.ExpenseDate = strings.TrimSpace(input.ExpenseDate)
 
-	// Validate fields
+	// Validate all fields
 	if input.Title == "" {
 		c.SendError(400, "Title is required")
 		return
@@ -348,7 +388,15 @@ func (c *ExpenseController) Update() {
 }
 
 // Delete handles DELETE /api/v1/expenses/:id
-// Deletes an expense by ID for the authenticated user.
+// @Summary Delete an expense by ID
+// @Tags Expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param id path int true "Expense ID"
+// @Success 200 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Failure 404 {object} ResponseData
+// @Router /api/v1/expenses/{id} [delete]
 func (c *ExpenseController) Delete() {
 	logs.Info("Delete expense endpoint called")
 
@@ -390,7 +438,16 @@ func isValidDate(date string) bool {
 }
 
 // Summary handles GET /api/v1/expenses/summary
-// Returns total spending grouped by category for a given date range.
+// @Summary Get spending summary grouped by category
+// @Tags Expenses
+// @Produce json
+// @Param X-User-ID header int true "User ID"
+// @Param date_from query string true "Start date YYYY-MM-DD"
+// @Param date_to query string true "End date YYYY-MM-DD"
+// @Success 200 {object} ResponseData
+// @Failure 400 {object} ResponseData
+// @Failure 401 {object} ResponseData
+// @Router /api/v1/expenses/summary [get]
 func (c *ExpenseController) Summary() {
 	logs.Info("Summary endpoint called")
 
@@ -450,7 +507,7 @@ func (c *ExpenseController) Summary() {
 		totalAmount += e.Amount
 	}
 
-	// Build the by_category slice
+	// Build the by_category slice in a consistent order
 	type categoryEntry struct {
 		Category string  `json:"category"`
 		Total    float64 `json:"total"`
@@ -468,7 +525,6 @@ func (c *ExpenseController) Summary() {
 		}
 	}
 
-	// Build summary response
 	summary := map[string]interface{}{
 		"date_from":    dateFrom,
 		"date_to":      dateTo,

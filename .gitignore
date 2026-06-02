@@ -8,13 +8,17 @@ conf/app.conf
 *.so
 *.dylib
 expense-tracker-api
+beego-expense-tracker
 
 # Ignore test cache
 *.test
 *.out
+coverage.out
 
 # Ignore Go build cache
 /vendor/
 
 # Ignore data files
 data/*.csv
+
+crud.txt
