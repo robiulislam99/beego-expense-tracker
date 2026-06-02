@@ -4,7 +4,6 @@ package routers
 
 import (
 	"expense-tracker-api/controllers"
-	"net/http"
 
 	beego "github.com/beego/beego/v2/server/web"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -13,7 +12,7 @@ import (
 // init registers all application routes when the package is loaded.
 func init() {
 	// Swagger UI endpoint
-	beego.Handler("/swagger/*", http.StripPrefix("/swagger/", http.HandlerFunc(httpSwagger.WrapHandler)))
+	beego.Handler("/swagger/*", httpSwagger.WrapHandler)
 
 	// Health check endpoint
 	beego.Router("/api/v1/health", &controllers.AuthController{}, "get:HealthCheck")

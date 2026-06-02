@@ -40,7 +40,18 @@ cd beego-expense-tracker
 go mod tidy
 ```
 
-### 3. Configure the app
+### 3. Generate Swagger Documentation
+
+```bash
+swag init
+```
+
+> If `swag` is not installed, install it first:
+> ```bash
+> go install github.com/swaggo/swag/cmd/swag@latest
+> ```
+
+### 4. Configure the app
 
 ```bash
 cp conf/app.conf.sample conf/app.conf
@@ -48,7 +59,7 @@ cp conf/app.conf.sample conf/app.conf
 
 The default `app.conf` values work out of the box — no changes needed to run locally.
 
-### 4. Run the server
+### 5. Run the server
 
 ```bash
 bee run
@@ -69,6 +80,21 @@ http://localhost:8080/swagger/index.html
 ```
 
 All endpoints are documented with request parameters, body schemas, and response examples.
+
+### Regenerate Swagger Docs
+
+After modifying API endpoints or adding new documentation comments, regenerate the Swagger files:
+
+```bash
+swag init
+```
+
+This command reads all Go source files (especially comments with Swagger annotations) and regenerates:
+- `docs/docs.go`
+- `docs/swagger.json`
+- `docs/swagger.yaml`
+
+> **Note:** Make sure `swag` is installed: `go install github.com/swaggo/swag/cmd/swag@latest`
 
 ---
 

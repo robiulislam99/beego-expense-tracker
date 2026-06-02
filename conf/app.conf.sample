@@ -9,3 +9,6 @@ expenses_csv_path = data/expenses.csv
 
 # App settings
 app_version = v1
+
+# Swagger - only enable in dev mode
+EnableDocs = true
