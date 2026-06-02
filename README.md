@@ -392,11 +392,13 @@ beego-expense-tracker/
 ├── routers/
 │   └── router.go             # Route registration
 ├── docs/                     # Auto-generated Swagger docs
-├── swagger/                  # Swagger UI static files
-├── data/                     # CSV files (auto-created, git ignored)
+├── swagger/                 # Swagger UI static files
+├── data/                    # CSV files (auto-created, git ignored)
 ├── tests/
-│   ├── auth_test.go          # User model tests
-│   └── expense_test.go       # Expense model tests
+│   ├── auth_controller_test.go   # Auth controller tests
+│   ├── auth_model_test.go        # User model tests
+│   ├── expense_controller_test.go# Expense controller tests
+│   └── expense_model_test.go     # Expense model tests
 ├── main.go
 ├── go.mod
 ├── go.sum
